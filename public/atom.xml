@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Hexo</title>
+  
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://yoursite.com/"/>
+  <updated>2018-05-08T10:59:24.051Z</updated>
+  <id>http://yoursite.com/</id>
+  
+  <author>
+    <name>John Doe</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Flume获取日志导入Kafka</title>
+    <link href="http://yoursite.com/2018/05/08/Flume%20%E8%8E%B7%E5%8F%96%E6%97%A5%E5%BF%97%E5%AF%BC%E5%85%A5Kafka/"/>
+    <id>http://yoursite.com/2018/05/08/Flume 获取日志导入Kafka/</id>
+    <published>2018-05-08T10:59:24.052Z</published>
+    <updated>2018-05-08T10:59:24.051Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="安装："><a href="#安装：" class="headerlink" title="安装："></a>安装：</h3><p>首先需要安装jdk，对于jdk版本冲突问题后面有解决方法</p><p><a href="http://flume.apache.org/download.html" target="_blank" rel="noopener">下载Flume</a><br>&emsp;<br><img src="../images/download.html.jpg" alt="下载页"><br><img src="../images/apache-flume-1.8.0-bin.tar.gz.jpg" alt="下载地址"></p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">第三个地址亲测可用</span><br><span class="line">wget <span class="string">'http://apache.mesi.com.ar/flume/1.8.0/apache-flume-1.8.0-bin.tar.gz'</span> --下载</span><br><span class="line">tar -xzvf apache-flume-1.8.0-bin.tar.gz  --解压</span><br><span class="line">mv apache-flume-1.8.0-bin flume-1.8.0   --重命名</span><br></pre></td></tr></table></figure><h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /opt/app/flume-1.8.0</span><br><span class="line">vim flume-1.8.0/conf/flume2kafka.conf  --加个配置，名字随意 因为启动的时候要指定配置文件的,这里用的是flume2kafka.conf</span><br></pre></td></tr></table></figure><h6 id="写入-flume2kafka-conf"><a href="#写入-flume2kafka-conf" class="headerlink" title="写入 flume2kafka.conf"></a>写入 flume2kafka.conf</h6><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">a1.sources=r1</span><br><span class="line"></span><br><span class="line">a1.channels=c1</span><br><span class="line"></span><br><span class="line">a1.sinks=k1</span><br><span class="line"></span><br><span class="line">a1.sources.r1.type=<span class="built_in">exec</span></span><br><span class="line"></span><br><span class="line">a1.sources.r1.command=tail -F /opt/logs/gmmservice/auditlog/csos_audit.log</span><br><span class="line"></span><br><span class="line">a1.sources.r1.channels=c1</span><br><span class="line"></span><br><span class="line">a1.channels.c1.type=memory</span><br><span class="line"></span><br><span class="line">a1.channels.c1.capacity=10000</span><br><span class="line"></span><br><span class="line">a1.channels.c1.transactionCapacity=100</span><br><span class="line"></span><br><span class="line">a1.sinks.k1.type = org.apache.flume.sink.kafka.KafkaSink</span><br><span class="line"></span><br><span class="line">a1.sinks.k1.topic = <span class="built_in">test</span></span><br><span class="line"></span><br><span class="line">a1.sinks.k1.brokerList = 106.15.225.114:9092</span><br><span class="line"></span><br><span class="line">a1.sinks.k1.requiredAcks = 1</span><br><span class="line"></span><br><span class="line">a1.sinks.k1.batchSize = 20</span><br><span class="line"></span><br><span class="line">a1.sinks.k1.channel = c1</span><br></pre></td></tr></table></figure><h5 id="解释一下"><a href="#解释一下" class="headerlink" title="解释一下:"></a>解释一下:</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a1.sources.r1.command=tail -F opt/<span class="built_in">log</span>/auto.log ---日志地址</span><br><span class="line">a1.sinks.k1.topic = <span class="built_in">test</span>         -----改成自己的topic名字，我的是<span class="built_in">test</span></span><br><span class="line">a1.sinks.k1.brokerList = 106.15.225.114:9092  ----kafka地址，集群配置可以用逗号隔开</span><br></pre></td></tr></table></figure><h5 id="JDK版本冲突怎么办"><a href="#JDK版本冲突怎么办" class="headerlink" title="JDK版本冲突怎么办"></a>JDK版本冲突怎么办</h5><p>对于jdk版本冲突问题 需要在flume 根目录下 copy一份对应版本的jdk，启动时指定Java_home即可  </p><h3 id="启动脚本"><a href="#启动脚本" class="headerlink" title="启动脚本"></a>启动脚本</h3><p>为了方便我们加一个启动脚本<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">flume 根目录下 vim start.sh 键入：</span><br><span class="line"></span><br><span class="line">JAVA_HOME=/opt/app/flume-1.8.0/jdk1.8.0_101</span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> JAVA_HOME</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"jdk -&gt; <span class="variable">$JAVA_HOME</span>"</span></span><br><span class="line"></span><br><span class="line">PATH=/opt/app/flume-1.8.0/jdk1.8.0_101/bin:<span class="variable">$PATH</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> PATH</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"path -&gt; <span class="variable">$PATH</span>"</span></span><br><span class="line"></span><br><span class="line">bin/flume-ng agent -n a1 -c /opt/app/flume-1.8.0/conf -f /opt/app/flume-1.8.0/conf/flume2kafka.conf   &gt;&gt; console.log 2&gt;&amp;1 &amp;</span><br></pre></td></tr></table></figure></p><h5 id="解释一下："><a href="#解释一下：" class="headerlink" title="解释一下："></a>解释一下：</h5><ul><li>flume2kafka.conf 是自己写的配置，名字是之前配置的对应   </li><li>console.log 写入启动日志的文件  </li><li>上面的地址注意要替换成自己flume 和jdk的路径，如果没有jdk版本冲突问题        只需要最后一条语句即可  </li></ul><h5 id="执行启动脚本"><a href="#执行启动脚本" class="headerlink" title="执行启动脚本"></a>执行启动脚本</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">chmod -R 777 /opt/app/flume-1.8.0   ---给所有用户授读写运行的权限 -R表示递归授权</span><br><span class="line">sh ./start.sh ---启动</span><br><span class="line">ps -ef |grep flume  ---查看是否启动成功</span><br><span class="line">tail -f /<span class="built_in">log</span>/flume.log  ---查看flume日志</span><br><span class="line">tail -f console.log     ---查看启动日志</span><br></pre></td></tr></table></figure><h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>到kafka 测试一下消费者：  </p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic <span class="built_in">test</span></span><br></pre></td></tr></table></figure><p>完！</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;安装：&quot;&gt;&lt;a href=&quot;#安装：&quot; class=&quot;headerlink&quot; title=&quot;安装：&quot;&gt;&lt;/a&gt;安装：&lt;/h3&gt;&lt;p&gt;首先需要安装jdk，对于jdk版本冲突问题后面有解决方法&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://flume.apache.o
+      
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Hello World</title>
+    <link href="http://yoursite.com/2018/05/08/hello-world/"/>
+    <id>http://yoursite.com/2018/05/08/hello-world/</id>
+    <published>2018-05-08T08:59:57.277Z</published>
+    <updated>2018-05-08T08:59:57.277Z</updated>
+    
+    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.
+      
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>新建文章</title>
+    <link href="http://yoursite.com/2018/05/08/%E6%96%B0%E5%BB%BA%E6%96%87%E7%AB%A0/"/>
+    <id>http://yoursite.com/2018/05/08/新建文章/</id>
+    <published>2018-05-08T07:29:50.000Z</published>
+    <updated>2018-05-08T08:59:57.277Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
+  
+</feed>
