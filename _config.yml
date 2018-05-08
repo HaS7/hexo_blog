@@ -4,7 +4,7 @@
 
 # Site
 title: HaS7
-subtitle:
+subtitle: Record And Share
 description:
 keywords:
 author: York Yang
@@ -13,7 +13,7 @@ timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yoursite.com
+url: http://york-yang.com
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
