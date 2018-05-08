@@ -6,8 +6,8 @@ title: Flume获取日志导入Kafka
 
 [下载Flume](http://flume.apache.org/download.html)  
 &emsp;
-![下载页](/source/images/download.html.jpg)   
-![下载地址](/source/images/apache-flume-1.8.0-bin.tar.gz.jpg)
+![下载页](../images/download.html.jpg)   
+![下载地址](../images/apache-flume-1.8.0-bin.tar.gz.jpg)
 
 ``` bash
 第三个地址亲测可用
